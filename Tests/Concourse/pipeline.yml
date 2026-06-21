@@ -6,14 +6,12 @@ resource_types:
 
 resources:
   - name: repo
-    type: pull-request
-    check_every: 1m
-    webhook_token: ((github_webhook_token))
+    type: git
     source:
-      repository: sasidhar265/qa-bdd-automation
-      access_token: ((github_access_token))
-      base_branch: main
-      states: ["OPEN"]
+      uri: https://github.com/sasidhar265/qa-bdd-automation.git
+      branch: main
+      username: ((GITHUB_USERNAME))
+      access_token: ((GITHUB_TOKEN))
 
 jobs:
   - name: run-tests
