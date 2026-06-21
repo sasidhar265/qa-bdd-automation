@@ -1,0 +1,52 @@
+# Build output
+bin/
+obj/
+out/
+TestResults/
+artifacts/
+
+# .NET generated files
+*.user
+*.suo
+*.rsuser
+*.DotSettings.user
+
+# SpecFlow generated feature code
+*.feature.cs
+
+# Test and report output
+allure-results/
+allure-report/
+**/allure-results/
+**/allure-report/
+allure-report.html
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+coverage.cobertura.xml
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Local Concourse/Fly CLI downloads
+fly
+fly-concourse
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Environment files
+.env
+.env.*
+!.env.example

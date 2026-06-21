@@ -1,0 +1,40 @@
+services:
+  concourse-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: concourse
+      POSTGRES_USER: concourse
+      POSTGRES_PASSWORD: concourse
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U concourse -d concourse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - concourse-db-data:/var/lib/postgresql/data
+
+  concourse:
+    image: concourse/concourse:7
+    command: quickstart
+    privileged: true
+    depends_on:
+      concourse-db:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      CONCOURSE_EXTERNAL_URL: http://localhost:8080
+      CONCOURSE_POSTGRES_HOST: concourse-db
+      CONCOURSE_POSTGRES_DATABASE: concourse
+      CONCOURSE_POSTGRES_USER: concourse
+      CONCOURSE_POSTGRES_PASSWORD: concourse
+      CONCOURSE_ADD_LOCAL_USER: test:test
+      CONCOURSE_MAIN_TEAM_LOCAL_USER: test
+      CONCOURSE_GARDEN_DNS_PROXY_ENABLE: "true"
+      CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE: "true"
+      CONCOURSE_CONTAINERD_DNS_SERVER: 192.168.65.7
+      CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
+
+volumes:
+  concourse-db-data:
