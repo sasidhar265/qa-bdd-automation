@@ -2,7 +2,7 @@ resource_types:
   - name: pull-request
     type: registry-image
     source:
-      repository: teliaoss/github-pr-resource
+      repository: https://github.com/sasidhar265/qa-bdd-automation.git
 
 resources:
   - name: repo

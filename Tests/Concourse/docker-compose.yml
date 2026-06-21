@@ -14,7 +14,7 @@ services:
       - concourse-db-data:/var/lib/postgresql/data
 
   concourse:
-    image: concourse/concourse:7
+    image: concourse/concourse:8
     command: quickstart
     privileged: true
     depends_on:
