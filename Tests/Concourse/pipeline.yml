@@ -10,8 +10,8 @@ resources:
     source:
       uri: https://github.com/sasidhar265/qa-bdd-automation.git
       branch: main
-      username: ((GITHUB_USERNAME))
-      access_token: ((GITHUB_TOKEN))
+      username: ((github_username))
+      access_token: ((github_token))
 
 jobs:
   - name: run-tests
