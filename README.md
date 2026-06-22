@@ -6,7 +6,7 @@ This project includes a local Concourse setup under `Concourse/`.
 
 The local Concourse stack contains:
 
-- `concourse/concourse:7`
+- `concourse/concourse:8`
 - `postgres:15`
 - a local Concourse user: `test` / `test`
 - the pipeline file: `Concourse/pipeline.yml`
