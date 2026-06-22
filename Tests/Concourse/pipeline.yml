@@ -4,8 +4,6 @@ resources:
     source:
       uri: https://github.com/sasidhar265/qa-bdd-automation.git
       branch: main
-      username: sasidhar265@gmail.com
-      password: ((github_token))
 
 jobs:
   - name: run-tests
@@ -65,7 +63,8 @@ jobs:
                     cd restored-repo
                     export NUGET_PACKAGES="$PWD/.nuget/packages"
                     apt-get update
-                    apt-get install -y --no-install-recommends curl ca-certificates tar gzip
+                    apt-get install -y --no-install-recommends curl ca-certificates tar gzip default-jre
+                    export JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
                     dotnet restore QaAutomation.sln
                     mkdir -p .tools
                     curl -fsSL https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.tgz \
@@ -95,6 +94,7 @@ jobs:
                     cp -a restored-repo/. built-repo/
                     cd built-repo
                     export NUGET_PACKAGES="$PWD/.nuget/packages"
+                    dotnet restore QaAutomation.sln
                     set +e
                     dotnet build QaAutomation.sln --no-restore | tee ../build-status/build.log
                     build_exit_code=${PIPESTATUS[0]}
@@ -128,19 +128,23 @@ jobs:
                     export NUGET_PACKAGES="$PWD/.nuget/packages"
                     export PATH="$PWD/.tools/allure/bin:$PATH"
                     apt-get update
-                    apt-get install -y --no-install-recommends default-jre chromium
+                    apt-get install -y --no-install-recommends default-jre chromium chromium-driver python3
+                    export JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
                     export CHROME_BIN="$(command -v chromium || command -v chromium-browser)"
+                    export CHROMEDRIVER_BIN="$(command -v chromedriver)"
                     export CHROME_HEADLESS=true
+                    results_dir="$PWD/../test-results"
+                    mkdir -p "$results_dir"
+                    dotnet restore Tests/Tests.csproj
                     set +e
                     dotnet test Tests/Tests.csproj \
                       --no-build \
                       --logger "trx;LogFileName=test-results.trx" \
-                      --results-directory "$PWD/test-results" \
-                      | tee ../test-results/test-output.log
+                      --results-directory "$results_dir" \
+                      | tee "$results_dir/test-output.log"
                     test_exit_code=${PIPESTATUS[0]}
                     set -e
-                    cp -a test-results/. ../test-results/
-                    trx_file="$(find ../test-results -name '*.trx' | head -n 1)"
+                    trx_file="$(find "$results_dir" -name '*.trx' | head -n 1)"
                     if [ -z "$trx_file" ]; then
                       echo "No TRX result file was generated." | tee ../test-results/test-summary.txt
                       exit 1

@@ -22,7 +22,12 @@ public class UISteps
     public void GivenIOpenTheTestSite()
     {
         var chromeOptions = CreateChromeOptions();
-        _driver = new ChromeDriver(chromeOptions);
+        var chromeDriverBinary = Environment.GetEnvironmentVariable("CHROMEDRIVER_BIN");
+        var chromeDriverService = string.IsNullOrWhiteSpace(chromeDriverBinary)
+            ? ChromeDriverService.CreateDefaultService()
+            : ChromeDriverService.CreateDefaultService(Path.GetDirectoryName(chromeDriverBinary)!, Path.GetFileName(chromeDriverBinary));
+
+        _driver = new ChromeDriver(chromeDriverService, chromeOptions);
         _scenarioContext[WebDriverContextKey] = _driver;
         _driver.Navigate().GoToUrl(TestSiteUrl);
     }

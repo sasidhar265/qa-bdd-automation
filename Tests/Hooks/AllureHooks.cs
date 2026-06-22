@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Allure.Net.Commons;
 using NUnit.Framework;
 using OpenQA.Selenium;
@@ -76,7 +77,7 @@ public class AllureHooks
         }
 
         var failureDetails = $"{error.GetType().FullName}{Environment.NewLine}{error.Message}{Environment.NewLine}{error.StackTrace}";
-        AllureApi.AddAttachment($"{attachmentPrefix} error", "text/plain", failureDetails);
+        AllureApi.AddAttachment($"{attachmentPrefix} error", "text/plain", Encoding.UTF8.GetBytes(failureDetails));
 
         if (UISteps.TryGetDriver(_scenarioContext, out var driver))
         {

@@ -23,8 +23,7 @@ services:
     ports:
       - "8080:8080"
     dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      - 1.1.1.1
     environment:
       CONCOURSE_EXTERNAL_URL: http://localhost:8080
       CONCOURSE_POSTGRES_HOST: concourse-db
@@ -34,7 +33,7 @@ services:
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
-      CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE: "true"
+      CONCOURSE_WORKER_CONTAINERD_DNS_SERVER: 1.1.1.1
 
 volumes:
   concourse-db-data:
