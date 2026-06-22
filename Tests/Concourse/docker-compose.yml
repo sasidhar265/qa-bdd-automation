@@ -37,12 +37,6 @@ services:
       CONCOURSE_POSTGRES_PASSWORD: concourse
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
-
-      # DNS fixes for Concourse task/resource containers
-      CONCOURSE_GARDEN_DNS_PROXY_ENABLE: "true"
-      CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE: "true"
-      CONCOURSE_CONTAINERD_DNS_SERVER: 8.8.8.8,1.1.1.1
-
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
 
 volumes:
