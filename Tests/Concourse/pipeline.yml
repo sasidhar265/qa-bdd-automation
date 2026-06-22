@@ -1,10 +1,10 @@
 resources:
-  - name: repo
+  - name: source-repo
     type: git
     source:
       uri: https://github.com/sasidhar265/qa-bdd-automation.git
       branch: main
-      username: ((github_username))
+      username: sasidhar265@gmail.com
       password: ((github_token))
 
 jobs:
