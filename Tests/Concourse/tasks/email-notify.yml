@@ -3,8 +3,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: alpine
-    tag: "3.20"
+    repository: mcr.microsoft.com/dotnet/sdk
+    tag: "8.0"
 
 inputs:
   - name: test-results
@@ -24,7 +24,9 @@ run:
     # Do not enable shell tracing: this task handles SMTP credentials.
     - -ec
     - |
-      apk add --no-cache ca-certificates msmtp
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get install -y --no-install-recommends ca-certificates msmtp
 
       # Google displays App Passwords in groups separated by spaces, while
       # SMTP authentication expects the underlying 16-character value.

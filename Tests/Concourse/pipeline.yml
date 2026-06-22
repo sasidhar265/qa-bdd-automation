@@ -12,37 +12,36 @@ jobs:
         trigger: true
         version: every
 
-      - do:
-          - task: source-metadata
-            file: repo/Tests/Concourse/tasks/source-metadata.yml
+      - task: source-metadata
+        file: repo/Tests/Concourse/tasks/source-metadata.yml
 
-          - task: install-deps
-            file: repo/Tests/Concourse/tasks/install-deps.yml
+      - task: install-deps
+        file: repo/Tests/Concourse/tasks/install-deps.yml
 
-          - task: build
-            file: repo/Tests/Concourse/tasks/build.yml
+      - task: build
+        file: repo/Tests/Concourse/tasks/build.yml
 
-          - task: test
-            file: repo/Tests/Concourse/tasks/test.yml
+      - task: test
+        file: repo/Tests/Concourse/tasks/test.yml
 
-          - task: package-xray
-            file: repo/Tests/Concourse/tasks/package-xray.yml
+      - task: package-xray
+        file: repo/Tests/Concourse/tasks/package-xray.yml
 
-          - task: publish-report
-            file: repo/Tests/Concourse/tasks/publish-report.yml
+      - task: publish-report
+        file: repo/Tests/Concourse/tasks/publish-report.yml
 
-          # Notification delivery is best-effort. SMTP credentials or provider
-          # availability must not override the build and test result.
-          - try:
-              task: email-notify
-              file: repo/Tests/Concourse/tasks/email-notify.yml
-              params:
-                SMTP_HOST: ((smtp_host))
-                SMTP_PORT: ((smtp_port))
-                SMTP_USERNAME: ((smtp_username))
-                SMTP_PASSWORD: ((smtp_password))
-                EMAIL_FROM: ((email_from))
-                EMAIL_TO: sasidhar265@gmail.com
+      # Notification delivery is best-effort. SMTP credentials or provider
+      # availability must not override the build and test result.
+      - try:
+          task: email-notify
+          file: repo/Tests/Concourse/tasks/email-notify.yml
+          params:
+            SMTP_HOST: ((smtp_host))
+            SMTP_PORT: ((smtp_port))
+            SMTP_USERNAME: ((smtp_username))
+            SMTP_PASSWORD: ((smtp_password))
+            EMAIL_FROM: ((email_from))
+            EMAIL_TO: sasidhar265@gmail.com
 
-          - task: evaluate-status
-            file: repo/Tests/Concourse/tasks/evaluate-status.yml
+      - task: evaluate-status
+        file: repo/Tests/Concourse/tasks/evaluate-status.yml
