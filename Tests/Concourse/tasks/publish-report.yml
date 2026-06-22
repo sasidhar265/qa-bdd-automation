@@ -13,6 +13,9 @@ outputs:
   - name: report-metadata
 
 run:
+  # The curl image defaults to an unprivileged user, but Concourse creates
+  # declared output directories as root before starting the task process.
+  user: root
   path: sh
   args:
     - -exc
