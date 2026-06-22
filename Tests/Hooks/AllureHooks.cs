@@ -115,7 +115,7 @@ public class AllureHooks
             StartInfo = new ProcessStartInfo
             {
                 FileName = "allure",
-                Arguments = $"generate \"{TestOutputResultsPath}\" --clean -o \"{ReportPath}\"",
+                Arguments = $"generate \"{TestOutputResultsPath}\" --clean --single-file -o \"{ReportPath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false

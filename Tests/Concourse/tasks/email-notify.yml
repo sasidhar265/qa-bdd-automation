@@ -9,6 +9,7 @@ image_resource:
 inputs:
   - name: test-results
   - name: report-metadata
+  - name: allure-report
 
 params:
   SMTP_HOST: ""
@@ -56,16 +57,37 @@ run:
       fi
 
       report_url="$(cat report-metadata/report-url.txt)"
+      report_file="allure-report/index.html"
+      if [ ! -f "$report_file" ]; then
+        echo "Portable Allure report was not generated: $report_file" >&2
+        exit 1
+      fi
+
+      mime_boundary="allure-report-$(date +%s)"
 
       {
         echo "From: ${EMAIL_FROM}"
         echo "To: ${EMAIL_TO}"
         echo "Subject: [Concourse] QA BDD tests ${test_status}"
+        echo "MIME-Version: 1.0"
+        echo "Content-Type: multipart/mixed; boundary=${mime_boundary}"
+        echo
+        echo "--${mime_boundary}"
         echo "Content-Type: text/plain; charset=UTF-8"
         echo
         echo "QA BDD automation test status: ${test_status}"
         echo
         cat test-results/test-summary.txt
         echo
+        echo "The portable Allure report is attached as allure-report.html."
         echo "Allure HTML report: ${report_url}"
+        echo
+        echo "--${mime_boundary}"
+        echo 'Content-Type: text/html; charset=UTF-8; name="allure-report.html"'
+        echo 'Content-Disposition: attachment; filename="allure-report.html"'
+        echo "Content-Transfer-Encoding: base64"
+        echo
+        base64 "$report_file"
+        echo
+        echo "--${mime_boundary}--"
       } | msmtp --file=/tmp/msmtprc "${EMAIL_TO}"
