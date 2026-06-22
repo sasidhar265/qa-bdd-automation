@@ -14,7 +14,7 @@ services:
       - concourse-db-data:/var/lib/postgresql/data
     dns:
       - 8.8.8.8
-      - 1.1.1.1
+      - 8.8.4.4
 
   concourse:
     image: concourse/concourse:8
@@ -28,7 +28,8 @@ services:
       - "8080:8080"
     dns:
       - 8.8.8.8
-      - 1.1.1.1
+      - 8.8.4.4
+
     environment:
       CONCOURSE_EXTERNAL_URL: http://localhost:8080
       CONCOURSE_POSTGRES_HOST: concourse-db
@@ -38,7 +39,15 @@ services:
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
+      CONCOURSE_TSA_HOST: web:2222
 #      CONCOURSE_WORKER_RUNTIME: containerd
 #      CONCOURSE_GARDEN_DNS_SERVER: 8.8.8.8
+  web:
+    image: concourse/concourse
+    command: web
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
 volumes:
   concourse-db-data:
