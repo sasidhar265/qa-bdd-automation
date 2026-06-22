@@ -81,9 +81,20 @@ This creates a local target named `local`.
 
 ## 4. Create or update the pipeline
 
-Copy the SMTP settings from `Concourse/vars.example.yml` into the ignored
-`Concourse/vars.yml` file and replace the placeholder values. The recipient is
-configured as `sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
+Configure the scheduler and SMTP settings in the ignored
+`Concourse/vars.yml` file. The recipient is configured as
+`sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
+
+```yaml
+daily_schedule_start_after: "2026-06-23 07:00:00"
+daily_schedule_timezone: Europe/London
+
+smtp_host: smtp.gmail.com
+smtp_port: "587"
+smtp_username: your-email@gmail.com
+smtp_password: your-gmail-app-password
+email_from: your-email@gmail.com
+```
 
 ```sh
 ./fly-concourse -t local set-pipeline \
@@ -93,9 +104,16 @@ configured as `sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
   -n
 ```
 
-The pipeline now splits restore, build, test, report publishing, and email
-notification into separate task files under `Concourse/tasks/`. The `-n` flag
-applies the pipeline without an interactive confirmation prompt.
+The pipeline uses three separate jobs:
+
+- `scheduler` emits one trigger during the configured daily time window.
+- `run-tests` uses that trigger to test the latest `main` revision and publish the report.
+- `send-email` runs after a successful test job and emails the published report.
+
+Configure `daily_schedule_start_after` and `daily_schedule_timezone` in
+`Concourse/vars.yml`. The first run occurs on or after that timestamp, followed
+by one run every 24 hours. The `-n` flag applies the pipeline without an
+interactive confirmation prompt.
 
 ## 5. Unpause the pipeline
 

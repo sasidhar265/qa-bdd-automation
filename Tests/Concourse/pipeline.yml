@@ -1,4 +1,11 @@
 resources:
+  - name: daily-schedule
+    type: time
+    source:
+      interval: 24h
+      start_after: ((daily_schedule_start_after))
+      location: ((daily_schedule_timezone))
+
   - name: repo
     type: git
     source:
@@ -6,11 +13,19 @@ resources:
       branch: main
 
 jobs:
+  - name: scheduler
+    plan:
+      - get: daily-schedule
+        trigger: true
+
   - name: run-tests
     plan:
-      - get: repo
+      - get: daily-schedule
         trigger: true
-        version: every
+        passed:
+          - scheduler
+
+      - get: repo
 
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
@@ -35,8 +50,12 @@ jobs:
 
   - name: send-email
     plan:
-      - get: repo
+      - get: daily-schedule
         trigger: true
+        passed:
+          - run-tests
+
+      - get: repo
         passed:
           - run-tests
 
