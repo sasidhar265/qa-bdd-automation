@@ -21,9 +21,14 @@ params:
 run:
   path: sh
   args:
-    - -exc
+    # Do not enable shell tracing: this task handles SMTP credentials.
+    - -ec
     - |
       apk add --no-cache ca-certificates msmtp
+
+      # Google displays App Passwords in groups separated by spaces, while
+      # SMTP authentication expects the underlying 16-character value.
+      smtp_password="$(printf '%s' "$SMTP_PASSWORD" | tr -d '[:space:]')"
 
       cat > /tmp/msmtprc <<EOF
       defaults
@@ -35,7 +40,7 @@ run:
       host ${SMTP_HOST}
       port ${SMTP_PORT}
       user ${SMTP_USERNAME}
-      password ${SMTP_PASSWORD}
+      password ${smtp_password}
       from ${EMAIL_FROM}
       account default : concourse
       EOF
