@@ -12,12 +12,34 @@ jobs:
         trigger: true
         version: every
 
-      - task: run-tests
-        file: repo/Tests/Concourse/run_tests.yml
-        params:
-          SMTP_HOST: ((smtp_host))
-          SMTP_PORT: ((smtp_port))
-          SMTP_USERNAME: ((smtp_username))
-          SMTP_PASSWORD: ((smtp_password))
-          EMAIL_FROM: ((email_from))
-          EMAIL_TO: sasidhar265@gmail.com
+      - do:
+          - task: source-metadata
+            file: repo/Tests/Concourse/tasks/source-metadata.yml
+
+          - task: install-deps
+            file: repo/Tests/Concourse/tasks/install-deps.yml
+
+          - task: build
+            file: repo/Tests/Concourse/tasks/build.yml
+
+          - task: test
+            file: repo/Tests/Concourse/tasks/test.yml
+
+          - task: package-xray
+            file: repo/Tests/Concourse/tasks/package-xray.yml
+
+          - task: publish-report
+            file: repo/Tests/Concourse/tasks/publish-report.yml
+
+          - task: email-notify
+            file: repo/Tests/Concourse/tasks/email-notify.yml
+            params:
+              SMTP_HOST: ((smtp_host))
+              SMTP_PORT: ((smtp_port))
+              SMTP_USERNAME: ((smtp_username))
+              SMTP_PASSWORD: ((smtp_password))
+              EMAIL_FROM: ((email_from))
+              EMAIL_TO: sasidhar265@gmail.com
+
+          - task: evaluate-status
+            file: repo/Tests/Concourse/tasks/evaluate-status.yml

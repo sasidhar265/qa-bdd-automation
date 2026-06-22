@@ -93,9 +93,9 @@ configured as `sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
   -n
 ```
 
-The pipeline delegates its restore, build, test, Allure publishing, and email
-notification commands to `Concourse/run_tests.yml`. The `-n` flag applies the
-pipeline without an interactive confirmation prompt.
+The pipeline now splits restore, build, test, report publishing, and email
+notification into separate task files under `Concourse/tasks/`. The `-n` flag
+applies the pipeline without an interactive confirmation prompt.
 
 ## 5. Unpause the pipeline
 

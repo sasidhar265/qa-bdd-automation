@@ -1,0 +1,33 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: curlimages/curl
+    tag: "8.12.1"
+
+inputs:
+  - name: xray-report-artifact
+
+outputs:
+  - name: report-metadata
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      report_id="qa-bdd-automation-run-tests-$(date -u +%Y%m%dT%H%M%SZ)"
+      internal_report_url="http://10.80.0.1:8081/reports/${report_id}"
+      report_url="http://localhost:8081/reports/${report_id}/allure-report/index.html"
+
+      mkdir -p report-metadata
+      curl --fail --show-error \
+        --request POST \
+        --header "Content-Type: application/gzip" \
+        --data-binary @xray-report-artifact/allure-report-for-xray.tar.gz \
+        "$internal_report_url"
+
+      echo "$report_id" | tee report-metadata/report-id.txt
+      echo "$report_url" | tee report-metadata/report-url.txt
+      echo "Allure HTML report: $report_url"

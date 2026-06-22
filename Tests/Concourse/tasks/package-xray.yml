@@ -1,0 +1,46 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: alpine
+    tag: "3.20"
+
+inputs:
+  - name: source-metadata
+  - name: test-results
+  - name: allure-report
+
+outputs:
+  - name: xray-report-artifact
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      mkdir -p xray-report-artifact/allure-report
+      cp -a allure-report/. xray-report-artifact/allure-report/
+      cp source-metadata/source-version.txt xray-report-artifact/
+      cp source-metadata/commit-summary.txt xray-report-artifact/
+      cp test-results/test-summary.txt xray-report-artifact/
+      cp test-results/test-output.log xray-report-artifact/
+
+      cd xray-report-artifact
+      tar -czf allure-report-for-xray.tar.gz \
+        allure-report \
+        source-version.txt \
+        commit-summary.txt \
+        test-summary.txt \
+        test-output.log
+
+      {
+        echo "Artifact: allure-report-for-xray.tar.gz"
+        echo "Purpose: Attach this archive to the Jira Xray test execution task."
+        echo "Contents:"
+        echo "- Allure HTML report"
+        echo "- source-version.txt"
+        echo "- commit-summary.txt"
+        echo "- test-summary.txt"
+        echo "- test-output.log"
+      } | tee xray-upload-instructions.txt
