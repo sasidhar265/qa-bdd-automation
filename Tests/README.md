@@ -107,7 +107,7 @@ email_from: your-email@gmail.com
 The pipeline uses three separate jobs:
 
 - `scheduler` emits one trigger during the configured daily time window.
-- `run-tests` uses that trigger to test the latest `main` revision and publish the report.
+- `run-tests` starts for each new `main` revision and from the daily trigger, then publishes the report.
 - `send-email` runs after a successful test job and emails the published report.
 
 Configure `daily_schedule_start_after` and `daily_schedule_timezone` in

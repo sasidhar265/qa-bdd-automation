@@ -26,6 +26,8 @@ jobs:
           - scheduler
 
       - get: repo
+        trigger: true
+        version: every
 
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
