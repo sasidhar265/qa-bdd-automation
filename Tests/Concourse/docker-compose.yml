@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
+      - "8081:8081"
     dns:
       - 1.1.1.1
     environment:
@@ -34,6 +35,18 @@ services:
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
       CONCOURSE_WORKER_CONTAINERD_DNS_SERVER: 1.1.1.1
+      CONCOURSE_WORKER_CONTAINERD_ALLOW_HOST_ACCESS: "true"
+
+  artifact-server:
+    build:
+      context: artifact-server
+    network_mode: service:concourse
+    depends_on:
+      - concourse
+    restart: unless-stopped
+    volumes:
+      - concourse-artifacts:/data
 
 volumes:
   concourse-db-data:
+  concourse-artifacts:

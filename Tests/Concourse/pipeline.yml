@@ -228,6 +228,31 @@ jobs:
                       echo "- test-output.log"
                     } | tee xray-upload-instructions.txt
 
+          - task: publish-allure-report
+            config:
+              platform: linux
+              image_resource:
+                type: registry-image
+                source:
+                  repository: curlimages/curl
+                  tag: "8.12.1"
+              inputs:
+                - name: xray-report-artifact
+              run:
+                path: sh
+                args:
+                  - -exc
+                  - |
+                    report_id="qa-bdd-automation-run-tests-$(date -u +%Y%m%dT%H%M%SZ)"
+                    internal_url="http://10.80.0.1:8081/reports/${report_id}"
+                    report_url="http://localhost:8081/reports/${report_id}/allure-report/index.html"
+                    curl --fail --show-error \
+                      --request POST \
+                      --header "Content-Type: application/gzip" \
+                      --data-binary @xray-report-artifact/allure-report-for-xray.tar.gz \
+                      "$internal_url"
+                    echo "Allure HTML report: $report_url"
+
           - task: evaluate-test-status
             config:
               platform: linux
