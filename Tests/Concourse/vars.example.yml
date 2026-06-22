@@ -1,8 +1,0 @@
-smtp_host: smtp.gmail.com
-smtp_port: "587"
-smtp_username: sasidhar265@gmail.com
-smtp_password: {{password}}
-email_from: nspsasidhar@example.com
-smtp_auth: true
-smtp_starttls_enable: true
-smtp_ssl_trust: smtp.gmail.com
