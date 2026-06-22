@@ -81,14 +81,21 @@ This creates a local target named `local`.
 
 ## 4. Create or update the pipeline
 
+Copy the SMTP settings from `Concourse/vars.example.yml` into the ignored
+`Concourse/vars.yml` file and replace the placeholder values. The recipient is
+configured as `sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
+
 ```sh
 ./fly-concourse -t local set-pipeline \
   -p qa-bdd-automation \
   -c Concourse/pipeline.yml \
+  -l Concourse/vars.yml \
   -n
 ```
 
-The `-n` flag applies the pipeline without an interactive confirmation prompt.
+The pipeline delegates its restore, build, test, Allure publishing, and email
+notification commands to `Concourse/run_tests.yml`. The `-n` flag applies the
+pipeline without an interactive confirmation prompt.
 
 ## 5. Unpause the pipeline
 

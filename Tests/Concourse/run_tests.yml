@@ -1,0 +1,176 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: mcr.microsoft.com/dotnet/sdk
+    tag: "8.0"
+
+inputs:
+  - name: repo
+
+outputs:
+  - name: pipeline-artifacts
+
+run:
+  path: bash
+  args:
+    - -ec
+    - |
+      cd repo
+
+      artifacts_dir="$PWD/../pipeline-artifacts"
+      results_dir="$artifacts_dir/test-results"
+      report_dir="$artifacts_dir/allure-report"
+      mkdir -p "$results_dir" "$report_dir"
+
+      {
+        echo "Repository: $(git config --get remote.origin.url)"
+        echo "Commit: $(git rev-parse HEAD)"
+        echo "Short commit: $(git rev-parse --short HEAD)"
+        echo "Author: $(git show -s --format='%an <%ae>' HEAD)"
+        echo "Commit date: $(git show -s --format='%ci' HEAD)"
+        echo "Commit subject: $(git show -s --format='%s' HEAD)"
+      } | tee "$artifacts_dir/source-version.txt"
+      git show --stat --oneline --decorate --no-renames HEAD > "$artifacts_dir/commit-summary.txt"
+
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get install -y --no-install-recommends \
+        ca-certificates \
+        chromium \
+        chromium-driver \
+        curl \
+        default-jre-headless \
+        gzip \
+        msmtp \
+        python3 \
+        tar
+
+      export JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
+      export CHROME_BIN="$(command -v chromium || command -v chromium-browser)"
+      export CHROMEDRIVER_BIN="$(command -v chromedriver)"
+      export CHROME_HEADLESS=true
+      export NUGET_PACKAGES="$PWD/.nuget/packages"
+
+      mkdir -p .tools
+      curl -fsSL \
+        https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.tgz \
+        -o .tools/allure-commandline.tgz
+      tar -xzf .tools/allure-commandline.tgz -C .tools
+      mv .tools/allure-2.29.0 .tools/allure
+      export PATH="$PWD/.tools/allure/bin:$PATH"
+      allure --version
+
+      dotnet restore QaAutomation.sln
+      dotnet build QaAutomation.sln --no-restore | tee "$artifacts_dir/build.log"
+      echo "Build status: PASSED" | tee "$artifacts_dir/build-status.txt"
+
+      set +e
+      dotnet test Tests/Tests.csproj \
+        --no-build \
+        --logger "trx;LogFileName=test-results.trx" \
+        --results-directory "$results_dir" \
+        | tee "$results_dir/test-output.log"
+      test_exit_code=${PIPESTATUS[0]}
+      set -e
+
+      trx_file="$(find "$results_dir" -name '*.trx' | head -n 1)"
+      if [ -z "$trx_file" ]; then
+        echo "No TRX result file was generated." | tee "$results_dir/test-summary.txt"
+        test_exit_code=1
+      else
+        python3 - "$trx_file" > "$results_dir/test-summary.txt" <<'PY'
+      import sys
+      import xml.etree.ElementTree as ET
+
+      root = ET.parse(sys.argv[1]).getroot()
+      ns = {"trx": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
+      counters = root.find(".//trx:Counters", ns)
+
+      def count(name):
+          return counters.get(name, "0") if counters is not None else "0"
+
+      print(f"Total tests: {count('total')}")
+      print(f"Passed: {count('passed')}")
+      print(f"Failed: {count('failed')}")
+      print(f"Skipped: {count('notExecuted')}")
+
+      failed_results = root.findall(".//trx:UnitTestResult[@outcome='Failed']", ns)
+      if failed_results:
+          print("\nFailed tests:")
+
+      for result in failed_results:
+          print(f"- {result.get('testName', 'Unknown test')}")
+          message = result.findtext(".//trx:Message", default="", namespaces=ns).strip()
+          if message:
+              print(f"  Reason: {message}")
+      PY
+      fi
+
+      cat "$results_dir/test-summary.txt"
+      echo "$test_exit_code" > "$results_dir/test-exit-code.txt"
+
+      if [ -d Tests/allure-report ]; then
+        cp -a Tests/allure-report/. "$report_dir/"
+      else
+        echo "Allure HTML report was not generated." > "$report_dir/report-status.txt"
+      fi
+
+      tar -czf "$artifacts_dir/allure-report-for-xray.tar.gz" \
+        -C "$artifacts_dir" \
+        allure-report \
+        source-version.txt \
+        commit-summary.txt \
+        test-results/test-summary.txt \
+        test-results/test-output.log
+
+      report_id="qa-bdd-automation-run-tests-$(date -u +%Y%m%dT%H%M%SZ)"
+      internal_report_url="http://10.80.0.1:8081/reports/${report_id}"
+      report_url="http://localhost:8081/reports/${report_id}/allure-report/index.html"
+      curl --fail --show-error \
+        --request POST \
+        --header "Content-Type: application/gzip" \
+        --data-binary @"$artifacts_dir/allure-report-for-xray.tar.gz" \
+        "$internal_report_url"
+      echo "$report_url" | tee "$artifacts_dir/report-url.txt"
+      echo "Allure HTML report: $report_url"
+
+      if [ "$test_exit_code" -eq 0 ]; then
+        test_status="PASSED"
+      else
+        test_status="FAILED"
+      fi
+
+      cat > /tmp/msmtprc <<EOF
+      defaults
+      auth on
+      tls on
+      tls_starttls on
+      tls_trust_file /etc/ssl/certs/ca-certificates.crt
+      account concourse
+      host ${SMTP_HOST}
+      port ${SMTP_PORT}
+      user ${SMTP_USERNAME}
+      password ${SMTP_PASSWORD}
+      from ${EMAIL_FROM}
+      account default : concourse
+      EOF
+      chmod 600 /tmp/msmtprc
+
+      {
+        echo "From: ${EMAIL_FROM}"
+        echo "To: ${EMAIL_TO}"
+        echo "Subject: [Concourse] QA BDD tests ${test_status}"
+        echo "Content-Type: text/plain; charset=UTF-8"
+        echo
+        echo "QA BDD automation test status: ${test_status}"
+        echo
+        cat "$results_dir/test-summary.txt"
+        echo
+        echo "Allure HTML report: ${report_url}"
+      } | msmtp --file=/tmp/msmtprc "${EMAIL_TO}"
+
+      if [ "$test_exit_code" -ne 0 ]; then
+        exit "$test_exit_code"
+      fi
