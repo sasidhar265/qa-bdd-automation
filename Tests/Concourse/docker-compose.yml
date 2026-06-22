@@ -38,8 +38,7 @@ services:
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
-      CONCOURSE_WORKER_RUNTIME: containerd
-      CONCOURSE_GARDEN_DNS_SERVER: 8.8.8.8
-
+#      CONCOURSE_WORKER_RUNTIME: containerd
+#      CONCOURSE_GARDEN_DNS_SERVER: 8.8.8.8
 volumes:
   concourse-db-data:
