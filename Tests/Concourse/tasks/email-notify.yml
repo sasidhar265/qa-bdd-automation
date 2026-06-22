@@ -3,8 +3,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: mcr.microsoft.com/dotnet/sdk
-    tag: "8.0"
+    repository: alpine
+    tag: "3.20"
 
 inputs:
   - name: test-results
@@ -19,12 +19,11 @@ params:
   EMAIL_TO: ""
 
 run:
-  path: bash
+  path: sh
   args:
     - -exc
     - |
-      apt-get update
-      apt-get install -y --no-install-recommends ca-certificates msmtp
+      apk add --no-cache ca-certificates msmtp
 
       cat > /tmp/msmtprc <<EOF
       defaults
