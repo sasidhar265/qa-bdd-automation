@@ -9,19 +9,13 @@ using Tests.StepDefinitions;
 namespace Tests.Hooks;
 
 [Binding]
-public class AllureHooks
+public class AllureHooks(ScenarioContext scenarioContext)
 {
     private const string ResultsDirectory = "allure-results";
     private const string ReportDirectory = "allure-report";
     private static readonly string ProjectDirectory = GetProjectDirectory();
     private static readonly string ReportPath = Path.Combine(ProjectDirectory, ReportDirectory);
     private static readonly string TestOutputResultsPath = Path.Combine(TestContext.CurrentContext.TestDirectory, ResultsDirectory);
-    private readonly ScenarioContext _scenarioContext;
-
-    public AllureHooks(ScenarioContext scenarioContext)
-    {
-        _scenarioContext = scenarioContext;
-    }
 
     [BeforeTestRun]
     public static void BeforeTestRun()
@@ -33,7 +27,7 @@ public class AllureHooks
     [AfterStep]
     public void AttachFailureDetailsAfterStep()
     {
-        if (_scenarioContext.TestError == null)
+        if (scenarioContext.TestError == null)
         {
             return;
         }
@@ -44,7 +38,7 @@ public class AllureHooks
     [AfterScenario]
     public void AttachFailureDetailsAfterScenario()
     {
-        if (_scenarioContext.TestError != null)
+        if (scenarioContext.TestError != null)
         {
             AttachFailureDetails("Failed scenario");
         }
@@ -53,13 +47,13 @@ public class AllureHooks
     [AfterScenario]
     public void CloseBrowser()
     {
-        if (!UISteps.TryGetDriver(_scenarioContext, out var driver))
+        if (!UISteps.TryGetDriver(scenarioContext, out var driver))
         {
             return;
         }
 
         driver.Quit();
-        UISteps.RemoveDriver(_scenarioContext);
+        UISteps.RemoveDriver(scenarioContext);
     }
 
     [AfterTestRun]
@@ -70,7 +64,7 @@ public class AllureHooks
 
     private void AttachFailureDetails(string attachmentPrefix)
     {
-        var error = _scenarioContext.TestError;
+        var error = scenarioContext.TestError;
         if (error == null)
         {
             return;
@@ -79,7 +73,7 @@ public class AllureHooks
         var failureDetails = $"{error.GetType().FullName}{Environment.NewLine}{error.Message}{Environment.NewLine}{error.StackTrace}";
         AllureApi.AddAttachment($"{attachmentPrefix} error", "text/plain", Encoding.UTF8.GetBytes(failureDetails));
 
-        if (UISteps.TryGetDriver(_scenarioContext, out var driver))
+        if (UISteps.TryGetDriver(scenarioContext, out var driver))
         {
             AttachScreenshot(driver, attachmentPrefix);
         }
@@ -170,10 +164,7 @@ public class AllureHooks
 
     private static string SanitizeFileName(string value)
     {
-        foreach (var invalidCharacter in Path.GetInvalidFileNameChars())
-        {
-            value = value.Replace(invalidCharacter, '-');
-        }
+        value = Path.GetInvalidFileNameChars().Aggregate(value, (current, invalidCharacter) => current.Replace(invalidCharacter, '-'));
 
         return value.Replace(' ', '-').ToLowerInvariant();
     }
