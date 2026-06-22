@@ -1,5 +1,5 @@
 resources:
-  - name: source-repo
+  - name: repo
     type: git
     source:
       uri: https://github.com/sasidhar265/qa-bdd-automation.git
