@@ -22,6 +22,10 @@ run:
       cd built-repo
 
       export NUGET_PACKAGES="$PWD/.nuget/packages"
+      # NuGet writes absolute package paths into project.assets.json. Because
+      # Concourse runs each task in a different working directory, refresh the
+      # assets file here before building with --no-restore.
+      dotnet restore QaAutomation.sln
       dotnet build QaAutomation.sln --no-restore | tee ../build-status/build.log
       build_exit_code=${PIPESTATUS[0]}
 
