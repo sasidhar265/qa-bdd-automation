@@ -2,7 +2,7 @@ resources:
   - name: repo
     type: git
     source:
-      uri: https://github.com/sasidhar265/qa-bdd-automation.git
+      uri: git@github.com:sasidhar265/qa-bdd-automation.git
       branch: main
       username: ((github_username))
       password: ((github_token))
