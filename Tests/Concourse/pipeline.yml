@@ -29,6 +29,19 @@ jobs:
 
       - task: publish-report
         file: repo/Tests/Concourse/tasks/publish-report.yml
+
+      - task: evaluate-status
+        file: repo/Tests/Concourse/tasks/evaluate-status.yml
+
+  - name: send-email
+    plan:
+      - get: repo
+        trigger: true
+        passed:
+          - run-tests
+
+      - task: send-email
+        file: repo/Tests/Concourse/tasks/send-email.yml
         params:
           SMTP_HOST: ((smtp_host))
           SMTP_PORT: ((smtp_port))
@@ -36,6 +49,3 @@ jobs:
           SMTP_PASSWORD: ((smtp_password))
           EMAIL_FROM: ((email_from))
           EMAIL_TO: sasidhar265@gmail.com
-
-      - task: evaluate-status
-        file: repo/Tests/Concourse/tasks/evaluate-status.yml
