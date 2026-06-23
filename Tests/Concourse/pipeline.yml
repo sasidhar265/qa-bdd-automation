@@ -2,30 +2,56 @@ resources:
   - name: daily-schedule
     type: time
     source:
-      interval: 24h
+      interval: ((daily_schedule_interval))
       start_after: ((daily_schedule_start_after))
       location: ((daily_schedule_timezone))
 
   - name: repo
     type: git
     source:
-      uri: https://github.com/sasidhar265/qa-bdd-automation.git
-      branch: main
+      uri: ((git_repo_uri))
+      branch: ((main_branch))
+
+  - name: feature-repo
+    type: git
+    source:
+      uri: ((git_repo_uri))
+      branch: ((feature_branch))
 
 jobs:
-  - name: scheduler
-    plan:
-      - get: daily-schedule
-        trigger: true
-
   - name: run-tests
     plan:
       - get: daily-schedule
         trigger: true
-        passed:
-          - scheduler
 
       - get: repo
+        version: every
+
+      - task: source-metadata
+        file: repo/Tests/Concourse/tasks/source-metadata.yml
+
+      - task: install-deps
+        file: repo/Tests/Concourse/tasks/install-deps.yml
+
+      - task: build
+        file: repo/Tests/Concourse/tasks/build.yml
+
+      - task: test
+        file: repo/Tests/Concourse/tasks/test.yml
+
+      - task: package-xray
+        file: repo/Tests/Concourse/tasks/package-xray.yml
+
+      - task: publish-report
+        file: repo/Tests/Concourse/tasks/publish-report.yml
+
+      - task: evaluate-status
+        file: repo/Tests/Concourse/tasks/evaluate-status.yml
+
+  - name: run-feature-branch-tests
+    plan:
+      - get: repo
+        resource: feature-repo
         trigger: true
         version: every
 
@@ -69,4 +95,4 @@ jobs:
           SMTP_USERNAME: ((smtp_username))
           SMTP_PASSWORD: ((smtp_password))
           EMAIL_FROM: ((email_from))
-          EMAIL_TO: sasidhar265@gmail.com
+          EMAIL_TO: ((email_to))
