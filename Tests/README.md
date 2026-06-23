@@ -3,6 +3,8 @@
 ## Run the Concourse pipeline locally with Docker
 
 This project includes a local Concourse setup under `Concourse/`.
+For the pipeline structure, task wrappers, and shell script responsibilities,
+see `Concourse/README.md`.
 
 The local Concourse stack contains:
 

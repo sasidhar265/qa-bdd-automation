@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+set -exc
+
+mkdir -p xray-report-artifact/allure-report
+cp -a allure-report/. xray-report-artifact/allure-report/
+cp allure-report/index.html xray-report-artifact/allure-report.html
+cp source-metadata/source-version.txt xray-report-artifact/
+cp source-metadata/commit-summary.txt xray-report-artifact/
+cp test-results/test-summary.txt xray-report-artifact/
+cp test-results/test-output.log xray-report-artifact/
+
+cd xray-report-artifact
+tar -czf allure-report-for-xray.tar.gz \
+  allure-report \
+  allure-report.html \
+  source-version.txt \
+  commit-summary.txt \
+  test-summary.txt \
+  test-output.log
+
+{
+  echo "Artifact: allure-report-for-xray.tar.gz"
+  echo "Purpose: Attach this archive to the Jira Xray test execution task."
+  echo "Contents:"
+  echo "- Allure HTML report"
+  echo "- Portable single-file report: allure-report.html"
+  echo "- source-version.txt"
+  echo "- commit-summary.txt"
+  echo "- test-summary.txt"
+  echo "- test-output.log"
+} | tee xray-upload-instructions.txt
