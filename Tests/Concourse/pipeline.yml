@@ -11,7 +11,7 @@ resources:
     source:
       uri: ((git_repo_uri))
       branch: ((main_branch))
-
+      
   - name: feature-repo
     type: git
     source:
@@ -19,13 +19,20 @@ resources:
       branch: ((feature_branch))
 
 jobs:
-  - name: run-tests
+  - name: scheduler
     plan:
       - get: daily-schedule
         trigger: true
 
+  - name: run-tests
+    plan:
+      - get: daily-schedule
+        trigger: true
+        passed:
+          - scheduler
+
       - get: repo
-        version: every
+        trigger: true
 
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
@@ -48,13 +55,12 @@ jobs:
       - task: evaluate-status
         file: repo/Tests/Concourse/tasks/evaluate-status.yml
 
-  - name: run-feature-branch-tests
+  - name: run-feature-tests
     plan:
       - get: repo
         resource: feature-repo
         trigger: true
-        version: every
-
+        
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
 
@@ -95,4 +101,4 @@ jobs:
           SMTP_USERNAME: ((smtp_username))
           SMTP_PASSWORD: ((smtp_password))
           EMAIL_FROM: ((email_from))
-          EMAIL_TO: ((email_to))
+          EMAIL_TO: sasidhar265@gmail.com
