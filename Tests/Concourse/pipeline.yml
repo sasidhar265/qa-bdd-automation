@@ -60,27 +60,49 @@ jobs:
       - get: repo
         resource: feature-repo
         trigger: true
-        
-      - task: source-metadata
-        file: repo/Tests/Concourse/tasks/source-metadata.yml
 
-      - task: install-deps
-        file: repo/Tests/Concourse/tasks/install-deps.yml
+      - task: github-status-pending
+        file: repo/Tests/Concourse/tasks/github-status.yml
+        params:
+          GITHUB_TOKEN: ((github_status_token))
+          GITHUB_STATUS_STATE: pending
+          GITHUB_STATUS_DESCRIPTION: QA deployment checks are running.
 
-      - task: build
-        file: repo/Tests/Concourse/tasks/build.yml
+      - do:
+          - task: source-metadata
+            file: repo/Tests/Concourse/tasks/source-metadata.yml
 
-      - task: test
-        file: repo/Tests/Concourse/tasks/test.yml
+          - task: install-deps
+            file: repo/Tests/Concourse/tasks/install-deps.yml
 
-      - task: package-xray
-        file: repo/Tests/Concourse/tasks/package-xray.yml
+          - task: build
+            file: repo/Tests/Concourse/tasks/build.yml
 
-      - task: publish-report
-        file: repo/Tests/Concourse/tasks/publish-report.yml
+          - task: test
+            file: repo/Tests/Concourse/tasks/test.yml
 
-      - task: evaluate-status
-        file: repo/Tests/Concourse/tasks/evaluate-status.yml
+          - task: package-xray
+            file: repo/Tests/Concourse/tasks/package-xray.yml
+
+          - task: publish-report
+            file: repo/Tests/Concourse/tasks/publish-report.yml
+
+          - task: evaluate-status
+            file: repo/Tests/Concourse/tasks/evaluate-status.yml
+        on_success:
+          task: github-status-success
+          file: repo/Tests/Concourse/tasks/github-status.yml
+          params:
+            GITHUB_TOKEN: ((github_status_token))
+            GITHUB_STATUS_STATE: success
+            GITHUB_STATUS_DESCRIPTION: QA deployment checks passed.
+        on_failure:
+          task: github-status-failure
+          file: repo/Tests/Concourse/tasks/github-status.yml
+          params:
+            GITHUB_TOKEN: ((github_status_token))
+            GITHUB_STATUS_STATE: failure
+            GITHUB_STATUS_DESCRIPTION: QA deployment checks failed.
 
   - name: send-email
     plan:
