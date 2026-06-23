@@ -32,13 +32,34 @@ jobs:
           - scheduler
 
       - get: repo
+        trigger: true
+
+      - task: source-metadata
+        file: repo/Tests/Concourse/tasks/source-metadata.yml
+
+      - task: install-deps
+        file: repo/Tests/Concourse/tasks/install-deps.yml
+
+      - task: build
+        file: repo/Tests/Concourse/tasks/build.yml
+
+      - task: test
+        file: repo/Tests/Concourse/tasks/test.yml
+
+      - task: package-xray
+        file: repo/Tests/Concourse/tasks/package-xray.yml
+
+      - task: publish-report
+        file: repo/Tests/Concourse/tasks/publish-report.yml
+
+      - task: evaluate-status
+        file: repo/Tests/Concourse/tasks/evaluate-status.yml
 
   - name: run-feature-tests
     plan:
-      - get: daily-schedule
-        trigger: false
-      
-      - get: feature-repo
+      - get: repo
+        resource: feature-repo
+        trigger: true
         
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
