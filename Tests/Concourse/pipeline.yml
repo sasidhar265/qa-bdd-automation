@@ -34,25 +34,32 @@ jobs:
       - get: repo
         trigger: true
 
-      - task: source-metadata
+      - &source_metadata_task
+        task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
 
-      - task: install-deps
+      - &install_deps_task
+        task: install-deps
         file: repo/Tests/Concourse/tasks/install-deps.yml
 
-      - task: build
+      - &build_task
+        task: build
         file: repo/Tests/Concourse/tasks/build.yml
 
-      - task: test
+      - &test_task
+        task: test
         file: repo/Tests/Concourse/tasks/test.yml
 
-      - task: package-xray
+      - &package_xray_task
+        task: package-xray
         file: repo/Tests/Concourse/tasks/package-xray.yml
 
-      - task: publish-report
+      - &publish_report_task
+        task: publish-report
         file: repo/Tests/Concourse/tasks/publish-report.yml
 
-      - task: evaluate-status
+      - &evaluate_status_task
+        task: evaluate-status
         file: repo/Tests/Concourse/tasks/evaluate-status.yml
 
   - name: run-feature-tests
@@ -62,45 +69,33 @@ jobs:
         trigger: true
 
       - task: github-status-pending
-        file: repo/Tests/Concourse/tasks/github-status.yml
+        file: &github_status_task_file repo/Tests/Concourse/tasks/github-status.yml
         params:
-          GITHUB_TOKEN: ((github_status_token))
+          <<: &github_status_base_params
+            GITHUB_TOKEN: ((github_status_token))
           GITHUB_STATUS_STATE: pending
           GITHUB_STATUS_DESCRIPTION: QA deployment checks are running.
 
       - do:
-          - task: source-metadata
-            file: repo/Tests/Concourse/tasks/source-metadata.yml
-
-          - task: install-deps
-            file: repo/Tests/Concourse/tasks/install-deps.yml
-
-          - task: build
-            file: repo/Tests/Concourse/tasks/build.yml
-
-          - task: test
-            file: repo/Tests/Concourse/tasks/test.yml
-
-          - task: package-xray
-            file: repo/Tests/Concourse/tasks/package-xray.yml
-
-          - task: publish-report
-            file: repo/Tests/Concourse/tasks/publish-report.yml
-
-          - task: evaluate-status
-            file: repo/Tests/Concourse/tasks/evaluate-status.yml
+          - *source_metadata_task
+          - *install_deps_task
+          - *build_task
+          - *test_task
+          - *package_xray_task
+          - *publish_report_task
+          - *evaluate_status_task
         on_success:
           task: github-status-success
-          file: repo/Tests/Concourse/tasks/github-status.yml
+          file: *github_status_task_file
           params:
-            GITHUB_TOKEN: ((github_status_token))
+            <<: *github_status_base_params
             GITHUB_STATUS_STATE: success
             GITHUB_STATUS_DESCRIPTION: QA deployment checks passed.
         on_failure:
           task: github-status-failure
-          file: repo/Tests/Concourse/tasks/github-status.yml
+          file: *github_status_task_file
           params:
-            GITHUB_TOKEN: ((github_status_token))
+            <<: *github_status_base_params
             GITHUB_STATUS_STATE: failure
             GITHUB_STATUS_DESCRIPTION: QA deployment checks failed.
 
