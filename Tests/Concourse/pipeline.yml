@@ -10,7 +10,13 @@ resources:
     type: git
     source:
       uri: ((git_repo_uri))
-      branch: ((main))
+      branch: ((main_branch))
+      
+  - name: feature-repo
+    type: git
+    source:
+      uri: ((git_repo_uri))
+      branch: ((feature_branch))
 
 jobs:
   - name: scheduler
@@ -27,6 +33,13 @@ jobs:
 
       - get: repo
 
+  - name: run-feature-tests
+    plan:
+      - get: daily-schedule
+        trigger: false
+      
+      - get: feature-repo
+        
       - task: source-metadata
         file: repo/Tests/Concourse/tasks/source-metadata.yml
 
