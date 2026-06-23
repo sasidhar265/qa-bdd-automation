@@ -28,7 +28,12 @@ if ! printf '%s' "$repository_path" | grep -Eq '^[^/]+/[^/]+$'; then
   exit 1
 fi
 
-if [ -z "$GITHUB_STATUS_TARGET_URL" ] && [ -n "${ATC_EXTERNAL_URL:-}" ]; then
+if [ -z "$GITHUB_STATUS_TARGET_URL" ] \
+  && [ -n "${ATC_EXTERNAL_URL:-}" ] \
+  && [ -n "${BUILD_TEAM_NAME:-}" ] \
+  && [ -n "${BUILD_PIPELINE_NAME:-}" ] \
+  && [ -n "${BUILD_JOB_NAME:-}" ] \
+  && [ -n "${BUILD_NAME:-}" ]; then
   GITHUB_STATUS_TARGET_URL="${ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 fi
 
