@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -ec
+set -e
 
 apk add --no-cache curl git
 

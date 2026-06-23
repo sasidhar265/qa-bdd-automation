@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -exc
+set -ex
 
 mkdir -p xray-report-artifact/allure-report
 cp -a allure-report/. xray-report-artifact/allure-report/

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -exc
+set -ex
 
 cd repo
 {

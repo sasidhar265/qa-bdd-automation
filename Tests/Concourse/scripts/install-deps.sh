@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -exc
+set -ex
 
 cp -a repo/. restored-repo/
 cd restored-repo

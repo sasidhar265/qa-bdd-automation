@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -exc
+set -ex
 
 cat test-results/test-summary.txt
 test_exit_code="$(cat test-results/test-exit-code.txt)"

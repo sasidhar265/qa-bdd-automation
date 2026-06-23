@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Do not enable shell tracing because this script handles SMTP credentials.
-set -ec
+set -e
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
