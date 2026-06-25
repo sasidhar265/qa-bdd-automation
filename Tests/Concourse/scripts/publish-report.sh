@@ -5,10 +5,8 @@ apk add --no-cache git
 
 source_revision="$(git -C repo rev-parse --short=12 HEAD)"
 report_id="qa-bdd-automation-run-tests-${source_revision}"
-artifact_internal_base_url="${ARTIFACT_INTERNAL_BASE_URL:-http://10.80.0.1:8081}"
-artifact_public_base_url="${ARTIFACT_PUBLIC_BASE_URL:-http://localhost:8081}"
-internal_report_url="${artifact_internal_base_url}/reports/${report_id}"
-report_url="${artifact_public_base_url}/reports/${report_id}/allure-report.html"
+internal_report_url="http://10.80.0.1:8081/reports/${report_id}"
+report_url="http://localhost:8081/reports/${report_id}/allure-report.html"
 
 mkdir -p report-metadata published-report
 cp xray-report-artifact/allure-report.html published-report/allure-report.html

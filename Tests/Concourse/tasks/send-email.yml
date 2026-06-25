@@ -16,8 +16,6 @@ params:
   SMTP_PASSWORD: ""
   EMAIL_FROM: ""
   EMAIL_TO: ""
-  ARTIFACT_INTERNAL_BASE_URL: http://10.80.0.1:8081
-  ARTIFACT_PUBLIC_BASE_URL: http://localhost:8081
 
 run:
   path: sh

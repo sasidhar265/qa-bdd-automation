@@ -16,8 +16,6 @@ pipeline task.
   ignored `vars.yml` for local pipeline setup.
 - `docker-compose.yml` starts local Concourse, Postgres, and the report artifact
   server.
-- `native-setup.md` documents the non-Docker-Compose setup for native Concourse,
-  Postgres, and the report artifact server.
 - `artifact-server/` stores and serves generated Allure report artifacts.
 
 ## Jobs
