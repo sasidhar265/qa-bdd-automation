@@ -2,40 +2,32 @@
 set -eu
 
 artifact_directory="xray-report-artifact"
-archive_path="${artifact_directory}/allure-report-for-xray.tar.gz"
+allure_report_directory="${artifact_directory}/allure-report"
+allure_index_path="${allure_report_directory}/index.html"
+portable_allure_path="${artifact_directory}/allure-report.html"
 
-echo "Artifact directory: ${artifact_directory}"
+echo "Allure report artifact directory: ${allure_report_directory}"
 echo
 
-echo "Stored artifact files:"
-find "${artifact_directory}" -type f -exec ls -lh {} \; | sort
-echo
-
-echo "Stored artifact directories:"
-find "${artifact_directory}" -type d | sort
-echo
-
-if [ -f "${archive_path}" ]; then
-  echo "Archive contents: ${archive_path}"
-  tar -tzf "${archive_path}" | sort
-  echo
-else
-  echo "Archive not found: ${archive_path}"
+if [ ! -d "${allure_report_directory}" ]; then
+  echo "Allure report folder not found: ${allure_report_directory}"
   exit 1
 fi
 
-for file in \
-  source-version.txt \
-  commit-summary.txt \
-  test-summary.txt \
-  xray-upload-instructions.txt
-do
-  path="${artifact_directory}/${file}"
-  if [ -f "${path}" ]; then
-    echo "----- ${file} -----"
-    cat "${path}"
-    echo
-  else
-    echo "Missing artifact detail file: ${path}"
-  fi
-done
+echo "Allure report folder contents:"
+find "${allure_report_directory}" -maxdepth 2 -type f -exec ls -lh {} \; | sort
+echo
+
+if [ -f "${allure_index_path}" ]; then
+  echo "Generated Allure index.html:"
+  ls -lh "${allure_index_path}"
+  echo
+else
+  echo "Generated Allure index.html not found: ${allure_index_path}"
+  exit 1
+fi
+
+if [ -f "${portable_allure_path}" ]; then
+  echo "Portable Allure HTML report:"
+  ls -lh "${portable_allure_path}"
+fi

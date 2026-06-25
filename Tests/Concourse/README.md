@@ -123,8 +123,8 @@ manual Jira Xray attachment.
 - Script: `scripts/artifact-details.sh`
 - Inputs: `repo`, `xray-report-artifact`
 
-Prints the stored artifact files, directories, archive contents, and key text
-metadata into the Concourse build log.
+Prints the packaged Allure report folder contents and generated `index.html`
+details into the Concourse build log.
 
 ### `publish-report`
 
