@@ -16,3 +16,11 @@ smtp_ssl_trust: smtp.gmail.com
 daily_schedule_interval: 24h
 daily_schedule_start_after: "2026-06-22 23:55:00"
 daily_schedule_timezone: Europe/London
+
+# Docker Compose local setup:
+# artifact_internal_base_url: http://10.80.0.1:8081
+# artifact_public_base_url: http://localhost:8081
+#
+# Native Concourse worker on Linux, with artifact server running on the same host:
+artifact_internal_base_url: http://127.0.0.1:8081
+artifact_public_base_url: http://localhost:8081

@@ -1,10 +1,13 @@
 # QA BDD Automation
 
-## Run the Concourse pipeline locally with Docker
+## Run the Concourse pipeline locally
 
 This project includes a local Concourse setup under `Concourse/`.
 For the pipeline structure, task wrappers, and shell script responsibilities,
 see `Concourse/README.md`.
+
+The Docker Compose setup is the quickest local path. To run Concourse without
+Docker Compose, use `Concourse/native-setup.md`.
 
 The local Concourse stack contains:
 

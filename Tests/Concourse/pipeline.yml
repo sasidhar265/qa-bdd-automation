@@ -57,6 +57,9 @@ jobs:
       - &publish_report_task
         task: publish-report
         file: repo/Tests/Concourse/tasks/publish-report.yml
+        params:
+          ARTIFACT_INTERNAL_BASE_URL: ((artifact_internal_base_url))
+          ARTIFACT_PUBLIC_BASE_URL: ((artifact_public_base_url))
 
       - &evaluate_status_task
         task: evaluate-status
@@ -119,3 +122,5 @@ jobs:
           SMTP_PASSWORD: ((smtp_password))
           EMAIL_FROM: ((email_from))
           EMAIL_TO: sasidhar265@gmail.com
+          ARTIFACT_INTERNAL_BASE_URL: ((artifact_internal_base_url))
+          ARTIFACT_PUBLIC_BASE_URL: ((artifact_public_base_url))
