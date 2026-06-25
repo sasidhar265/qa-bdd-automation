@@ -8,8 +8,22 @@ apt-get install -y --no-install-recommends ca-certificates curl msmtp
 
 source_revision="$(git -C repo rev-parse --short=12 HEAD)"
 report_id="qa-bdd-automation-run-tests-${source_revision}"
-internal_report_url="http://10.80.0.1:8081/reports/${report_id}"
-report_url="http://localhost:8081/reports/${report_id}/allure-report.html"
+public_base_url="${REPORT_PUBLIC_BASE_URL%/}"
+download_base_url="${REPORT_DOWNLOAD_BASE_URL:-$REPORT_PUBLIC_BASE_URL}"
+download_base_url="${download_base_url%/}"
+
+if [ -z "$public_base_url" ]; then
+  echo "REPORT_PUBLIC_BASE_URL must be set to the browser-accessible report URL."
+  exit 1
+fi
+
+if [ -z "$download_base_url" ]; then
+  echo "REPORT_DOWNLOAD_BASE_URL or REPORT_PUBLIC_BASE_URL must be set to download the report."
+  exit 1
+fi
+
+report_url="${public_base_url}/${report_id}/allure-report.html"
+report_download_url="${download_base_url}/${report_id}"
 
 work_directory="$(mktemp -d)"
 smtp_config="${work_directory}/msmtprc"
@@ -20,10 +34,10 @@ trap 'rm -rf "$work_directory"' EXIT HUP INT TERM
 
 curl --fail --show-error \
   --output "$report_file" \
-  "${internal_report_url}/allure-report.html"
+  "${report_download_url}/allure-report.html"
 curl --fail --show-error \
   --output "$summary_file" \
-  "${internal_report_url}/test-summary.txt"
+  "${report_download_url}/test-summary.txt"
 
 smtp_password="$SMTP_PASSWORD"
 if [ "$SMTP_HOST" = "smtp.gmail.com" ]; then
