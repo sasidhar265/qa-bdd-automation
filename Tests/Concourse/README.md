@@ -41,8 +41,9 @@ Task order:
 3. `build`
 4. `test`
 5. `package-xray`
-6. `publish-report`
-7. `evaluate-status`
+6. `artifact-details`
+7. `publish-report`
+8. `evaluate-status`
 
 ### `run-feature-tests`
 
@@ -115,6 +116,15 @@ run. `evaluate-status` fails the build later using `test-exit-code.txt`.
 
 Builds a gzip archive containing the Allure report and supporting metadata for
 manual Jira Xray attachment.
+
+### `artifact-details`
+
+- Wrapper: `tasks/artifact-details.yml`
+- Script: `scripts/artifact-details.sh`
+- Inputs: `repo`, `xray-report-artifact`
+
+Prints the packaged Allure report folder contents and generated `index.html`
+details into the Concourse build log.
 
 ### `publish-report`
 
