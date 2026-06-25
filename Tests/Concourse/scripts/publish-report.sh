@@ -8,6 +8,7 @@ report_id="qa-bdd-automation-run-tests-${source_revision}"
 upload_base_url="${REPORT_UPLOAD_BASE_URL%/}"
 public_base_url="${REPORT_PUBLIC_BASE_URL%/}"
 upload_method="${REPORT_UPLOAD_METHOD:-PUT}"
+upload_full_allure_dir="${REPORT_UPLOAD_FULL_ALLURE_DIR:-false}"
 
 if [ -z "$upload_base_url" ]; then
   echo "REPORT_UPLOAD_BASE_URL must be set to the report storage upload URL."
@@ -66,10 +67,12 @@ upload_file xray-report-artifact/allure-report.html allure-report.html
 upload_file xray-report-artifact/test-summary.txt test-summary.txt
 upload_file xray-report-artifact/allure-report-for-xray.tar.gz allure-report-for-xray.tar.gz
 
-find xray-report-artifact/allure-report -type f | while IFS= read -r report_file; do
-  relative_path="${report_file#xray-report-artifact/}"
-  upload_file "$report_file" "$relative_path"
-done
+if [ "$upload_full_allure_dir" = "true" ]; then
+  find xray-report-artifact/allure-report -type f | while IFS= read -r report_file; do
+    relative_path="${report_file#xray-report-artifact/}"
+    upload_file "$report_file" "$relative_path"
+  done
+fi
 
 echo "$report_id" | tee report-metadata/report-id.txt
 echo "$report_url" | tee report-metadata/report-url.txt

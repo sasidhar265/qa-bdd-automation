@@ -104,6 +104,7 @@ report_public_base_url: https://artifacts.example.com/qa-bdd-automation/reports
 report_download_base_url: https://artifacts.example.com/qa-bdd-automation/reports
 report_upload_method: PUT
 report_upload_auth_header: "Authorization: Bearer your-artifact-token"
+report_upload_full_allure_dir: "false"
 ```
 
 Report storage variables:
@@ -117,6 +118,9 @@ Report storage variables:
 - `report_upload_method` defaults to `PUT`.
 - `report_upload_auth_header` is optional when the upload endpoint does not
   require authentication.
+- `report_upload_full_allure_dir` controls whether the full generated
+  `allure-report/` folder is uploaded. Keep it `false` unless your artifact
+  endpoint supports nested object paths.
 
 For each build, the pipeline creates a report path like:
 

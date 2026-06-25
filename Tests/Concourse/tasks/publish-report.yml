@@ -19,6 +19,7 @@ params:
   REPORT_PUBLIC_BASE_URL: ""
   REPORT_UPLOAD_METHOD: PUT
   REPORT_UPLOAD_AUTH_HEADER: ""
+  REPORT_UPLOAD_FULL_ALLURE_DIR: "false"
 
 run:
   # The curl image defaults to an unprivileged user, but Concourse creates

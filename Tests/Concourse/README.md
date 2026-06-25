@@ -77,6 +77,8 @@ Required variables:
 - `report_download_base_url`: download URL used by `send-email`
 - `report_upload_method`: HTTP method for uploads, normally `PUT`
 - `report_upload_auth_header`: optional auth header for upload requests
+- `report_upload_full_allure_dir`: optional full `allure-report/` directory
+  upload; defaults to `false`
 
 The uploaded path is based on the short commit SHA:
 
@@ -85,8 +87,9 @@ The uploaded path is based on the short commit SHA:
 ```
 
 The publish task uploads the portable `allure-report.html`, the readable
-`test-summary.txt`, the compressed `allure-report-for-xray.tar.gz`, and the full
-`allure-report/` directory.
+`test-summary.txt`, and the compressed `allure-report-for-xray.tar.gz`. It can
+also upload the full `allure-report/` directory when
+`report_upload_full_allure_dir` is set to `true`.
 
 ## Task And Script Reference
 
@@ -162,6 +165,7 @@ details into the Concourse build log.
   - `REPORT_PUBLIC_BASE_URL`
   - `REPORT_UPLOAD_METHOD`
   - `REPORT_UPLOAD_AUTH_HEADER`
+  - `REPORT_UPLOAD_FULL_ALLURE_DIR`
 
 Uploads the packaged report files to `REPORT_UPLOAD_BASE_URL` and records the
 report identifier and browser URL built from `REPORT_PUBLIC_BASE_URL`.

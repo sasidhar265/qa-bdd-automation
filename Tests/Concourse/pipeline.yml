@@ -66,6 +66,7 @@ jobs:
           REPORT_PUBLIC_BASE_URL: ((report_public_base_url))
           REPORT_UPLOAD_METHOD: ((report_upload_method))
           REPORT_UPLOAD_AUTH_HEADER: ((report_upload_auth_header))
+          REPORT_UPLOAD_FULL_ALLURE_DIR: ((report_upload_full_allure_dir))
 
       - &evaluate_status_task
         task: evaluate-status
