@@ -12,11 +12,14 @@ upload_full_allure_dir="${REPORT_UPLOAD_FULL_ALLURE_DIR:-false}"
 
 if [ -z "$upload_base_url" ]; then
   echo "REPORT_UPLOAD_BASE_URL must be set to the report storage upload URL."
+  echo "Check Concourse/vars.yml has report_upload_base_url and re-apply the pipeline with:"
+  echo "./fly-concourse -t local set-pipeline -p qa-bdd-automation -c Concourse/pipeline.yml -l Concourse/vars.yml -n"
   exit 1
 fi
 
 if [ -z "$public_base_url" ]; then
   echo "REPORT_PUBLIC_BASE_URL must be set to the browser-accessible report URL."
+  echo "Check Concourse/vars.yml has report_public_base_url and re-apply the pipeline."
   exit 1
 fi
 
