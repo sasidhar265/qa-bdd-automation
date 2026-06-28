@@ -16,6 +16,8 @@ params:
   SMTP_PASSWORD: ""
   EMAIL_FROM: ""
   EMAIL_TO: ""
+  REPORT_PUBLIC_BASE_URL: ""
+  REPORT_DOWNLOAD_BASE_URL: ""
 
 run:
   path: sh

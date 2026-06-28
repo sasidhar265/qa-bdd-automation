@@ -8,7 +8,7 @@ see `Concourse/README.md`.
 
 The local Concourse stack contains:
 
-- `concourse/concourse:7`
+- `concourse/concourse:8`
 - `postgres:15`
 - a local Concourse user: `test` / `test`
 - the pipeline file: `Concourse/pipeline.yml`
@@ -70,7 +70,7 @@ chmod +x fly-concourse
 The version should be a Concourse version, for example:
 
 ```text
-7.14.3
+8.x.x
 ```
 
 ## 3. Login to local Concourse
@@ -84,7 +84,9 @@ This creates a local target named `local`.
 ## 4. Create or update the pipeline
 
 Configure the scheduler and SMTP settings in the ignored
-`Concourse/vars.yml` file. The recipient is configured as
+`Concourse/vars.yml` file. Configure report storage with an environment-owned
+artifact endpoint instead of `localhost`; the pipeline uploads reports there and
+uses the same URL in email. The recipient is configured as
 `sasidhar265@gmail.com` in `Concourse/pipeline.yml`.
 
 ```yaml
@@ -96,7 +98,38 @@ smtp_port: "587"
 smtp_username: your-email@gmail.com
 smtp_password: your-gmail-app-password
 email_from: your-email@gmail.com
+
+report_upload_base_url: https://artifacts.example.com/qa-bdd-automation/reports
+report_public_base_url: https://artifacts.example.com/qa-bdd-automation/reports
+report_download_base_url: https://artifacts.example.com/qa-bdd-automation/reports
+report_upload_method: PUT
+report_upload_auth_header: "Authorization: Bearer your-artifact-token"
+report_upload_full_allure_dir: "false"
 ```
+
+Report storage variables:
+
+- `report_upload_base_url` is where the `publish-report` task uploads files.
+- `report_public_base_url` is the browser-accessible URL written into the
+  Concourse logs and email body.
+- `report_download_base_url` is where the `send-email` task downloads the
+  already published report from. Use the same value as `report_public_base_url`
+  unless your artifact store has separate internal and external URLs.
+- `report_upload_method` defaults to `PUT`.
+- `report_upload_auth_header` is optional when the upload endpoint does not
+  require authentication.
+- `report_upload_full_allure_dir` controls whether the full generated
+  `allure-report/` folder is uploaded. Keep it `false` unless your artifact
+  endpoint supports nested object paths.
+
+For each build, the pipeline creates a report path like:
+
+```text
+<report_public_base_url>/qa-bdd-automation-run-tests-<commit>/allure-report.html
+```
+
+The same uploaded report is reused by the email step, so the email contains both
+a link to the durable report and an attached `allure-report.html` copy.
 
 ```sh
 ./fly-concourse -t local set-pipeline \
@@ -109,8 +142,10 @@ email_from: your-email@gmail.com
 The pipeline uses three separate jobs:
 
 - `scheduler` emits one trigger during the configured daily time window.
-- `run-tests` starts for each new `main` revision and from the daily trigger, then publishes the report.
-- `send-email` runs after a successful test job and emails the published report.
+- `run-tests` starts for each new `main` revision and from the daily trigger,
+  then packages and uploads the Allure report.
+- `send-email` runs after a successful test job, downloads the published report
+  from report storage, and sends the report link plus attachment.
 
 Configure `daily_schedule_start_after` and `daily_schedule_timezone` in
 `Concourse/vars.yml`. The first run occurs on or after that timestamp, followed

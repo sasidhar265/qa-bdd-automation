@@ -14,9 +14,9 @@ pipeline task.
   behavior of a task needs to change.
 - `vars.example.yml` documents required pipeline variables. Copy the values into
   ignored `vars.yml` for local pipeline setup.
-- `docker-compose.yml` starts local Concourse, Postgres, and the report artifact
-  server.
-- `artifact-server/` stores and serves generated Allure report artifacts.
+- `docker-compose.yml` starts local Concourse and Postgres.
+- Generated Allure reports are uploaded to the configured external report
+  storage.
 
 ## Jobs
 
@@ -61,7 +61,35 @@ The status context is `qa-bdd-automation/pr-deployment` by default.
 ### `send-email`
 
 Runs after a successful `run-tests` build and sends the published Allure report
-by email.
+by email. It downloads the report from the configured report storage instead of
+using a worker-local HTTP server.
+
+## Report Storage
+
+The pipeline does not store reports on `localhost`. The `publish-report` task
+uploads the generated report files to an external artifact endpoint, and the
+`send-email` task downloads the same published files when preparing the email.
+
+Required variables:
+
+- `report_upload_base_url`: upload destination used by `publish-report`
+- `report_public_base_url`: browser URL written to logs and email
+- `report_download_base_url`: download URL used by `send-email`
+- `report_upload_method`: HTTP method for uploads, normally `PUT`
+- `report_upload_auth_header`: optional auth header for upload requests
+- `report_upload_full_allure_dir`: optional full `allure-report/` directory
+  upload; defaults to `false`
+
+The uploaded path is based on the short commit SHA:
+
+```text
+<report_public_base_url>/qa-bdd-automation-run-tests-<commit>/allure-report.html
+```
+
+The publish task uploads the portable `allure-report.html`, the readable
+`test-summary.txt`, and the compressed `allure-report-for-xray.tar.gz`. It can
+also upload the full `allure-report/` directory when
+`report_upload_full_allure_dir` is set to `true`.
 
 ## Task And Script Reference
 
@@ -132,9 +160,15 @@ details into the Concourse build log.
 - Script: `scripts/publish-report.sh`
 - Inputs: `repo`, `xray-report-artifact`
 - Outputs: `report-metadata`, `published-report`
+- Parameters:
+  - `REPORT_UPLOAD_BASE_URL`
+  - `REPORT_PUBLIC_BASE_URL`
+  - `REPORT_UPLOAD_METHOD`
+  - `REPORT_UPLOAD_AUTH_HEADER`
+  - `REPORT_UPLOAD_FULL_ALLURE_DIR`
 
-Uploads the packaged report to the local artifact server and records the report
-identifier and browser URL.
+Uploads the packaged report files to `REPORT_UPLOAD_BASE_URL` and records the
+report identifier and browser URL built from `REPORT_PUBLIC_BASE_URL`.
 
 ### `evaluate-status`
 
@@ -171,9 +205,11 @@ Posts a commit status to GitHub for the checked-out commit. This is used by
   - `SMTP_PASSWORD`
   - `EMAIL_FROM`
   - `EMAIL_TO`
+  - `REPORT_PUBLIC_BASE_URL`
+  - `REPORT_DOWNLOAD_BASE_URL`
 
-Downloads the published report and summary from the artifact server and sends an
-email with the portable Allure HTML report attached.
+Downloads the published report and summary from the configured report storage
+and sends an email with the portable Allure HTML report attached.
 
 ## Changing The Pipeline
 

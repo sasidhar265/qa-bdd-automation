@@ -61,6 +61,12 @@ jobs:
       - &publish_report_task
         task: publish-report
         file: repo/Tests/Concourse/tasks/publish-report.yml
+        params:
+          REPORT_UPLOAD_BASE_URL: ((report_upload_base_url))
+          REPORT_PUBLIC_BASE_URL: ((report_public_base_url))
+          REPORT_UPLOAD_METHOD: ((report_upload_method))
+          REPORT_UPLOAD_AUTH_HEADER: ((report_upload_auth_header))
+          REPORT_UPLOAD_FULL_ALLURE_DIR: ((report_upload_full_allure_dir))
 
       - &evaluate_status_task
         task: evaluate-status
@@ -124,3 +130,5 @@ jobs:
           SMTP_PASSWORD: ((smtp_password))
           EMAIL_FROM: ((email_from))
           EMAIL_TO: sasidhar265@gmail.com
+          REPORT_PUBLIC_BASE_URL: ((report_public_base_url))
+          REPORT_DOWNLOAD_BASE_URL: ((report_download_base_url))
